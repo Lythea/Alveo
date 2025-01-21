@@ -87,7 +87,7 @@ Route::get('testimonials/{id}', [TestimonialController::class, 'show']); // Get 
 Route::put('testimonials/{id}', [TestimonialController::class, 'update']); // Update a testimonial
 Route::delete('testimonials/{id}', [TestimonialController::class, 'destroy']); // Delete a testimonial
 });
-
+Route::post('testimonials_user', [TestimonialController::class, 'store']); // Store a new testimonial
 Route::middleware('auth:sanctum')->post('/logoutAll', [AuthController::class, 'logoutAll']);
 // Route::middleware(['web'])->get('/csrf-token', function () {
 //     return response()->json(['csrf_token' => csrf_token()]);
