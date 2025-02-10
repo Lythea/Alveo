@@ -27,7 +27,8 @@ use Illuminate\Support\Facades\Http;
 // routes/api.php
 
 // In routes/api.php
-
+Route::post('/admin/appointment/accept/{id}', [SetAppointmentController::class, 'accept']);
+Route::post('/admin/appointment/decline/{id}', [SetAppointmentController::class, 'decline']);
 Route::middleware(['auth-token'])->group(function () {
     Route::get('/admin/countproperties', [PropertyController::class, 'countProperties']);
     Route::get('/admin/countotherbuildings', [BuildingController::class, 'countOtherBuildings']);
@@ -177,7 +178,7 @@ Route::get('/areas/{slug}', [AreaController::class, 'show']);
 
 //Set Appointment
 Route::post('/set-appointment', [SetAppointmentController::class, 'store']);
-Route::post('/admin/appointment/accept', [SetAppointmentController::class, 'accept']);
+
 Route::get('/admin/appointments', [SetAppointmentController::class, 'getAll']);
 //Submit Property
 

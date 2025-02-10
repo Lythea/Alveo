@@ -117,59 +117,57 @@ public function request(Request $request)
 
         return response()->json($appointments);
     }
+public function accept($id)
+{
+    // Find the appointment with the specified ID
+    $appointment = SetAppointment::find($id);
 
-    public function accept(Request $request)
-    {
-        // Validate the incoming request
-        $request->validate([
-            'id' => 'required|integer',
-            'status' => 'required|string|in:ACCEPTED,DECLINED',
-        ]);
-
-        $id = $request->id;  // Get the ID from the request body
-        $status = $request->status; // Get the status from the request
-
-        Log::info($request->all());
-        // Find the appointment with the specified ID
-        $appointment = SetAppointment::find($id);
-
-        if ($appointment) {
-            if ($status === 'ACCEPTED') {
-                if ($appointment->status !== 'PENDING') {
-                    return response()->json([
-                        'message' => 'Appointment must be in PENDING status to accept.',
-                    ], 400); // If the appointment is not PENDING, reject the action
-                }
-                $appointment->status = 'ACCEPTED';
-                $appointment->save();
-
-                // Send an email to the user after updating the appointment
-                Mail::to($appointment->email)->send(new AppointmentAccepted($appointment));
-
-                return response()->json([
-                    'message' => 'Appointment accepted successfully!',
-                ], 200);
-            }
-
-            if ($status === 'DECLINED') {
-                if ($appointment->status !== 'PENDING') {
-                    return response()->json([
-                        'message' => 'Appointment must be in PENDING status to decline.',
-                    ], 400); // If the appointment is not PENDING, reject the action
-                }
-                $appointment->status = 'DECLINED';
-                $appointment->save();
-
-                Mail::to($appointment->email)->send(new AppointmentDeclined($appointment));
-
-                return response()->json([
-                    'message' => 'Appointment declined successfully!',
-                ], 200);
-            }
-        }
-
-        return response()->json([
-            'message' => 'Appointment not found.',
-        ], 404);
+    if ($appointment) {
+        // Update the status to ACCEPTED
+        return $this->updateStatus($appointment, 'ACCEPTED');
     }
+
+    return response()->json([
+        'message' => 'Appointment not found.',
+    ], 404);
+}
+
+public function decline($id)
+{
+    // Find the appointment with the specified ID
+    $appointment = SetAppointment::find($id);
+
+    if ($appointment) {
+        // Update the status to DECLINED
+        return $this->updateStatus($appointment, 'DECLINED');
+    }
+
+    return response()->json([
+        'message' => 'Appointment not found.',
+    ], 404);
+}
+
+public function updateStatus($appointment, $status)
+{
+    // Update the status of the appointment
+    $appointment->status = $status;
+    $appointment->save();
+
+    // Optionally send an email after updating the status
+    if ($status === 'ACCEPTED') {
+        // Send the accepted appointment email
+        Mail::to($appointment->email)->send(new AppointmentAccepted($appointment));
+    } elseif ($status === 'DECLINED') {
+        // Send the declined appointment email
+        Mail::to($appointment->email)->send(new AppointmentDeclined($appointment));
+    }
+
+    return response()->json([
+        'message' => "Appointment status updated to $status successfully!",
+    ], 200);
+}
+
+
+
+
 }
